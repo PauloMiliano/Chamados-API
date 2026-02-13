@@ -2,11 +2,11 @@
 using Chamados.DTOs.Users;
 using Chamados.Interfaces;
 using Chamados.Models;
-using Chamados.Services.Token;
+using Chamados.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Chamados.Services.Users
+namespace Chamados.Services
 {
     public class UserService : IUserService
     {
@@ -93,17 +93,6 @@ namespace Chamados.Services.Users
                         Success = false,
                         Errors = newUser.Errors.Select(e => e.Description),
                         Message = "Erro ao registrar usuário."
-                    };
-                }
-
-                var allowedRoles = new[] { "Usuário", "Analista" };
-
-                if (!allowedRoles.Contains(registerRequest.Role))
-                {
-                    return new RegisterResponseDto
-                    {
-                        Success = false,
-                        Message = "Role não permitida pra registro público."
                     };
                 }
 

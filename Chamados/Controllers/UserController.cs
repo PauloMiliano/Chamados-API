@@ -2,8 +2,7 @@
 using Chamados.DTOs.Users;
 using Chamados.Interfaces;
 using Chamados.Models;
-using Chamados.Services.Token;
-using Chamados.Services.Users;
+using Chamados.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +40,7 @@ namespace Chamados.Controllers
             }
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(RegisterRequestDto registerRequest)
         {

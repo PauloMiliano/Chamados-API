@@ -7,12 +7,18 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chamados.Services.Token
+namespace Chamados.Services
 {
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
+
+        public TokenService(IConfiguration configuration, UserManager<User> userManager)
+        {
+            _configuration = configuration;
+            _userManager = userManager;
+        }
 
         public async Task<string> GenerateToken(User user)
         {
@@ -20,10 +26,12 @@ namespace Chamados.Services.Token
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var roles = await _userManager.GetRolesAsync(user);
+            
 
             foreach (var role in roles)
             {
