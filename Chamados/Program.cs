@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,9 +77,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 
 
 var app = builder.Build();

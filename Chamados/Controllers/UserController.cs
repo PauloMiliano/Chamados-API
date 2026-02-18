@@ -34,7 +34,8 @@ namespace Chamados.Controllers
 
                 return Ok(userResponse);
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest("Erro ao realizar login. Exceção: " + ex.Message);
             }
@@ -57,5 +58,21 @@ namespace Chamados.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost("get")]
+        public async Task<IActionResult> GetUserByEmail(GetUserRequestDto getUserRequest)
+        {
+            try
+            {
+                _logger.LogInformation("Tentativa de obter usuário para o email: {Email}", getUserRequest);
+                var userResponse = await _userService.GetUserByEmailAsync(getUserRequest);
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao obter usuário. Exceção: {ex.Message}");
+            }
+
+        }
     }
 }

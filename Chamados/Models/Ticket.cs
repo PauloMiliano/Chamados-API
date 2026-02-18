@@ -12,10 +12,10 @@ namespace Chamados.Models
         [Required]
         public string Description { get; set; }
         [Required]
-        public string Author { get; set; }
+        public string AuthorId { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         [Required]
-        public string Priority { get; set; }
+        public TicketPriority Priority { get; set; }
         [Required]
         public TicketStatus Status { get; set; }
         public Guid? AssignedToUserId { get; set; }

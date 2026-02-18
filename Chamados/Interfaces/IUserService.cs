@@ -7,5 +7,7 @@ namespace Chamados.Interfaces
         Task<LoginResponseDto> LoginAsync(LoginRequestDto requestUser);
 
         Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto registerRequest);
+
+        Task<GetUserResponseDto> GetUserByEmailAsync(GetUserRequestDto getUserRequest);
     }
 }

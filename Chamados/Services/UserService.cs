@@ -121,5 +121,41 @@ namespace Chamados.Services
             }
         }
 
+        public async Task<GetUserResponseDto> GetUserByEmailAsync(GetUserRequestDto getUserRequest)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(getUserRequest.Email);
+                var roles = await _userManager.GetRolesAsync(user);
+                if (user != null)
+                {
+                    return new GetUserResponseDto
+                    {
+                        Message = "Usuário encontrado com sucesso.",
+                        Success = true,
+                        Email = user.Email,
+                        UserId = user.Id,
+                        UserName = user.Name,
+                        Roles = roles.ToList()
+                    };
+                }
+                
+                return new GetUserResponseDto
+                {
+                    Message = "Usuário não encontrado.",
+                    Success = false,
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new GetUserResponseDto
+                {
+                    Message = $"Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde. {ex.Message}",
+                    Success = false,
+                };
+            }
+        }
+
     }
 }
