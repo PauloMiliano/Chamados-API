@@ -34,7 +34,6 @@ namespace Chamados.Services
                     _logger.LogInformation("Usuário não encontrado para email: {Email}", requestUser.Email);
                     return new LoginResponseDto
                     {
-                        Success = false,
                         Message = "Usuário ou senha inválidos."
                     };
                 }
@@ -46,7 +45,6 @@ namespace Chamados.Services
                     _logger.LogInformation("Senha inválida.");
                     return new LoginResponseDto
                     {
-                        Success = false,
                         Message = "Usuário ou senha inválidos."
                     };
                 }
@@ -57,7 +55,6 @@ namespace Chamados.Services
 
                 return new LoginResponseDto
                 {
-                    Success = true,
                     Message = "Login realizado com sucesso.",
                     Token = token
                 };
@@ -67,7 +64,6 @@ namespace Chamados.Services
                 _logger.LogInformation(ex, "Erro durante login para email: {Email}", requestUser.Email);
                 return new LoginResponseDto
                 {
-                    Success = false,
                     Message = "Ocorreu um erro ao realizar login. Tente novamente mais tarde.",
                 };
             }
@@ -90,8 +86,6 @@ namespace Chamados.Services
                 {
                     return new RegisterResponseDto
                     {
-                        Success = false,
-                        Errors = newUser.Errors.Select(e => e.Description),
                         Message = "Erro ao registrar usuário."
                     };
                 }
@@ -102,14 +96,12 @@ namespace Chamados.Services
                 {
                     return new RegisterResponseDto
                     {
-                        Success = false,
                         Message = "Erro ao adicionar a role ao usuário."
                     };
                 }
 
                 return new RegisterResponseDto
                 {
-                    Success = true,
                     Message = "Registro realizado com sucesso."
                 };
 
@@ -132,7 +124,6 @@ namespace Chamados.Services
                     return new GetUserResponseDto
                     {
                         Message = "Usuário encontrado com sucesso.",
-                        Success = true,
                         Email = user.Email,
                         UserId = user.Id,
                         UserName = user.Name,
@@ -143,7 +134,6 @@ namespace Chamados.Services
                 return new GetUserResponseDto
                 {
                     Message = "Usuário não encontrado.",
-                    Success = false,
                 };
 
             }
@@ -151,8 +141,7 @@ namespace Chamados.Services
             {
                 return new GetUserResponseDto
                 {
-                    Message = $"Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde. {ex.Message}",
-                    Success = false,
+                    Message = $"Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde. {ex.Message}"
                 };
             }
         }

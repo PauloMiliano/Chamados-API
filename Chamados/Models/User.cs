@@ -6,7 +6,7 @@ namespace Chamados.Models
 {
     public class User : IdentityUser
     {
-        [Required]
+        [Required(ErrorMessage = "O nome do usuário é obrigatório.")]
         public string Name { get; set; }
 
     }

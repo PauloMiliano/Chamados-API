@@ -3,6 +3,8 @@ using Chamados.DTOs.Tickets;
 using Chamados.Interfaces;
 using Chamados.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Chamados.Services
 {
@@ -19,19 +21,19 @@ namespace Chamados.Services
             _userManager = userManager;
         }
 
-        public async Task<TicketResponse> OpenTicket(TicketRequestDto ticketRequest)
+        public async Task<TicketResponse> OpenTicket(TicketRequestDto ticketRequest, string id)
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(ticketRequest.AuthorId);
+                var user = await _userManager.FindByIdAsync(id);
                 var userName = user != null ? user.Name : "Desconhecido";
 
                 var ticket = new Ticket
                 {
                     Title = ticketRequest.Title,
                     Description = ticketRequest.Description,
-                    AuthorId = ticketRequest.AuthorId,
                     Priority = ticketRequest.Priority,
+                    AuthorId = id,
                     Status = ticketRequest.Status,
                     Created = ticketRequest.Created
                 };
@@ -42,11 +44,10 @@ namespace Chamados.Services
                 {
                     return new TicketResponse
                     {
-                        Message = $"Ticket aberto com sucesso.",
+                        Id = ticket.Id,
                         Title = ticket.Title,
                         Description = ticket.Description,
-                        Success = true,
-                        UserName = userName,
+                        AuthorName = userName,
                         Date = ticket.Created
                     };
                 }
@@ -54,23 +55,61 @@ namespace Chamados.Services
                 {
                     return new TicketResponse
                     {
-                        Message = $"Falha ao abrir ticket.",
                         Title = ticket.Title,
                         Description = ticket.Description,
-                        Success = false,
-                        UserName = userName,
+                        AuthorName = userName,
                         Date = DateTime.Now
                     };
                 }
             }
             catch (Exception ex)
             {
-                return new TicketResponse
+                return null;
+            }
+        }
+
+        public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var tickets = await _context.Tickets
+                    .OrderBy(c => c.Created)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                
+                return tickets.Select(ticket => new TicketListDto
                 {
-                    Message = $"Ocorreu um erro ao abrir o ticket. Exceção: {ex.Message}",
-                    Title = ticketRequest.Title,
-                    Description = ticketRequest.Description,
-                    Success = false
+                    Id = ticket.Id,
+                    Title = ticket.Title,
+                    AuthorId = ticket.AuthorId,
+                    AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
+                    Created = ticket.Created,
+                    Status = ticket.Status,
+                    AssignedToUserId = ticket.AssignedToUserId,
+                    AssignedToUserName = !string.IsNullOrEmpty(ticket.AssignedToUserId) ? _userManager.FindByIdAsync(ticket.AssignedToUserId).Result.Name : null
+                }).ToList();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter tickets");
+                return new List<TicketListDto>();
+            }
+        }
+
+        public async Task<Ticket> GetTicketById(Guid id)
+        {
+            try
+            {
+                return await _context.Tickets.FirstOrDefaultAsync(u => u.Id == id);
+            }
+            catch (Exception ex)
+            {
+                return new Ticket
+                {
+                    Title = $"Ocorreu um erro ao obter o ticket. Exceção: {ex.Message}"
                 };
             }
         }

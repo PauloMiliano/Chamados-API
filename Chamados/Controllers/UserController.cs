@@ -25,7 +25,7 @@ namespace Chamados.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> UserLogin(LoginRequestDto requestUser)
+        public async Task<IActionResult> UserLogin([FromBody] LoginRequestDto requestUser)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Chamados.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser(RegisterRequestDto registerRequest)
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterRequestDto registerRequest)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace Chamados.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("get")]
-        public async Task<IActionResult> GetUserByEmail(GetUserRequestDto getUserRequest)
+        public async Task<IActionResult> GetUserByEmail([FromBody] GetUserRequestDto getUserRequest)
         {
             try
             {
