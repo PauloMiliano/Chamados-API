@@ -13,7 +13,7 @@ namespace Chamados.Models
         public string Description { get; set; }
         [Required(ErrorMessage = "O Id do usuário é obrigatório.")]
         public string AuthorId { get; set; }
-        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Created { get; set; } = DateTime.UtcNow;
         [Required(ErrorMessage = "O campo de prioridade do Ticket é obrigatório.")]
         public TicketPriority Priority { get; set; }
         [Required(ErrorMessage = "O campo Status do Ticket é obrigatório.")]

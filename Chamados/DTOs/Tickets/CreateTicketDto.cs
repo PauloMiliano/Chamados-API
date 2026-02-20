@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Chamados.DTOs.Tickets
 {
-    public class TicketRequestDto
+    public class CreateTicketDto
     {
         [Required(ErrorMessage = "O título do Ticket é obrigatório.")]
         public string Title { get; set; }

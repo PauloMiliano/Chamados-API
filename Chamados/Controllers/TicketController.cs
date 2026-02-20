@@ -19,7 +19,7 @@ namespace Chamados.Controllers
         }
 
         [HttpPost("open")]
-        public async Task<IActionResult> OpenTicket([FromBody] TicketRequestDto ticket)
+        public async Task<IActionResult> OpenTicket([FromBody] CreateTicketDto ticket)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var ticketResponse = await _ticketService.OpenTicket(ticket, userId);
@@ -42,5 +42,13 @@ namespace Chamados.Controllers
             return Ok(ticket);
         }
 
+        [Authorize(Roles = "Admin, Analyst")]
+        [HttpPut("assign/{userId}")]
+        public async Task<IActionResult> AssignUserTicket([FromRoute] AssignTicketDto assignTicket)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var ticketResponse = await _ticketService.AssignUserTicket(assignTicket, userId);
+            return Ok(ticketResponse);
+        }
     }
 }

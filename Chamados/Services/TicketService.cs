@@ -22,7 +22,7 @@ namespace Chamados.Services
             _userManager = userManager;
         }
 
-        public async Task<TicketResponse> OpenTicket(TicketRequestDto ticketRequest, string userId)
+        public async Task<TicketResponse> OpenTicket(CreateTicketDto ticketRequest, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             var userName = user != null ? user.Name : "Desconhecido";
@@ -42,10 +42,39 @@ namespace Chamados.Services
             return new TicketResponse
             {
                 Id = ticket.Id,
-                Title = ticket.Title,
-                Description = ticket.Description,
                 AuthorName = userName,
+                Title = ticket.Title,
+                Priority = ticket.Priority,
+                Status = ticket.Status,
+                Description = ticket.Description,
                 Date = ticket.Created
+            };
+        }
+
+        public async Task<TicketResponse> AssignUserTicket (AssignTicketDto assignTicket, string userId)
+        {
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == assignTicket.TicketId);
+
+            if (ticket == null)
+            {
+                throw new NotFoundException("Ticket não encontrado");
+            }
+
+            ticket.AssignedToUserId = userId;
+            await _context.SaveChangesAsync();
+
+            var userNameAnalyst = _userManager.FindByIdAsync(userId).Result.Name;
+
+            return new TicketResponse
+            {
+                Id = ticket.Id,
+                AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
+                Title = ticket.Title,
+                Priority = ticket.Priority,
+                Status = ticket.Status,
+                Description = ticket.Description,
+                Date = ticket.Created,
+                AssignedToUserName = userNameAnalyst
             };
 
         }
