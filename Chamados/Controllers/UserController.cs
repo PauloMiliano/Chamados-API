@@ -27,51 +27,29 @@ namespace Chamados.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> UserLogin([FromBody] LoginRequestDto requestUser)
         {
-            try
-            {
-                _logger.LogInformation("Tentativa de login para Email: {Email}", requestUser.Email);
-                var userResponse = await _userService.LoginAsync(requestUser);
+            _logger.LogInformation("Tentativa de login para Email: {Email}", requestUser.Email);
+            var userResponse = await _userService.LoginAsync(requestUser);
 
-                return Ok(userResponse);
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Erro ao realizar login. Exceção: " + ex.Message);
-            }
+            return Ok(userResponse);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterRequestDto registerRequest)
         {
-            try
-            {
-                _logger.LogInformation("Tentativa de registro para o email: {Email}", registerRequest.Email);
-                var registerResponse = await _userService.RegisterAsync(registerRequest);
+            _logger.LogInformation("Tentativa de registro para o email: {Email}", registerRequest.Email);
+            var registerResponse = await _userService.RegisterAsync(registerRequest);
 
-                return Ok(registerResponse);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro ao registrar. Exceção: {ex.Message}");
-            }
+            return Ok(registerResponse);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("get")]
         public async Task<IActionResult> GetUserByEmail([FromBody] GetUserRequestDto getUserRequest)
         {
-            try
-            {
-                _logger.LogInformation("Tentativa de obter usuário para o email: {Email}", getUserRequest);
-                var userResponse = await _userService.GetUserByEmailAsync(getUserRequest);
-                return Ok(userResponse);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Erro ao obter usuário. Exceção: {ex.Message}");
-            }
+            _logger.LogInformation("Tentativa de obter usuário para o email: {Email}", getUserRequest);
+            var userResponse = await _userService.GetUserByEmailAsync(getUserRequest);
+            return Ok(userResponse);
 
         }
     }

@@ -1,5 +1,7 @@
-﻿using Chamados.Data;
+﻿using Azure.Identity;
+using Chamados.Data;
 using Chamados.DTOs.Users;
+using Chamados.Exceptions;
 using Chamados.Interfaces;
 using Chamados.Models;
 using Chamados.Services;
@@ -25,125 +27,89 @@ namespace Chamados.Services
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto requestUser)
         {
-            try
+            var user = await _userManager.FindByEmailAsync(requestUser.Email);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByEmailAsync(requestUser.Email);
-
-                if (user == null)
-                {
-                    _logger.LogInformation("Usuário não encontrado para email: {Email}", requestUser.Email);
-                    return new LoginResponseDto
-                    {
-                        Message = "Usuário ou senha inválidos."
-                    };
-                }
-
-                var passwordValid = await _userManager.CheckPasswordAsync(user, requestUser.Password);
-
-                if (!passwordValid)
-                {
-                    _logger.LogInformation("Senha inválida.");
-                    return new LoginResponseDto
-                    {
-                        Message = "Usuário ou senha inválidos."
-                    };
-                }
-
-                var token = await _tokenService.GenerateToken(user);
-
-                _logger.LogInformation("Login realizado com sucesso para usuário: {UserName}", user.Name);
-
-                return new LoginResponseDto
-                {
-                    Message = "Login realizado com sucesso.",
-                    Token = token
-                };
+                _logger.LogWarning("Login falhou: usuário não encontrado para email {Email}", requestUser.Email);
+                throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
             }
-            catch (Exception ex)
+
+            var login = await _signInManager.CheckPasswordSignInAsync(user, requestUser.Password, lockoutOnFailure: true);
+
+            if (!login.Succeeded)
             {
-                _logger.LogInformation(ex, "Erro durante login para email: {Email}", requestUser.Email);
-                return new LoginResponseDto
-                {
-                    Message = "Ocorreu um erro ao realizar login. Tente novamente mais tarde.",
-                };
+                _logger.LogWarning("Login falhou: senha inválida para email {Email}", requestUser.Email);
+                throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
             }
+
+            if (login.IsLockedOut)
+            {
+                throw new UnauthorizedAccessException("Usuário bloqueado devido a múltiplas tentativas de login falhadas. Tente novamente mais tarde.");
+            }
+
+            var token = await _tokenService.GenerateToken(user);
+
+            _logger.LogInformation("Login realizado com sucesso para usuário: {UserName}", user.Name);
+
+            return new LoginResponseDto
+            {
+                Token = token
+            };
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto registerRequest)
         {
-            try
+            var user = new User
             {
-                var user = new User
-                {
-                    UserName = registerRequest.Email,
-                    Name = registerRequest.Name,
-                    Email = registerRequest.Email
-                };
+                UserName = registerRequest.Email,
+                Name = registerRequest.Name,
+                Email = registerRequest.Email
+            };
 
-                var newUser = await _userManager.CreateAsync(user, registerRequest.Password);
+            var newUser = await _userManager.CreateAsync(user, registerRequest.Password);
 
-                if (!newUser.Succeeded)
-                {
-                    return new RegisterResponseDto
-                    {
-                        Message = "Erro ao registrar usuário."
-                    };
-                }
-
-                var addRoleResult = await _userManager.AddToRoleAsync(user, registerRequest.Role);
-
-                if (!addRoleResult.Succeeded)
-                {
-                    return new RegisterResponseDto
-                    {
-                        Message = "Erro ao adicionar a role ao usuário."
-                    };
-                }
-
-                return new RegisterResponseDto
-                {
-                    Message = "Registro realizado com sucesso."
-                };
-
-            }
-            catch (Exception ex)
+            if (!newUser.Succeeded)
             {
-                _logger.LogInformation("Erro durante registro para email: {Email}", registerRequest.Email);
-                return null;
+                var errors = string.Join(", ", newUser.Errors.Select(e => e.Description));
+
+                throw new BadRequestException(errors);
             }
+
+            var addRoleResult = await _userManager.AddToRoleAsync(user, registerRequest.Role);
+
+            if (!addRoleResult.Succeeded)
+            {
+                var erros = addRoleResult.Errors.Select(e => e.Description);
+                throw new ApplicationException($"Erro ao registrar usuário: {string.Join(", ")}");
+            }
+
+            var token = await _tokenService.GenerateToken(user);
+
+            return new RegisterResponseDto
+            {
+                UserName = registerRequest.Name,
+                Token = token
+            };
         }
 
         public async Task<GetUserResponseDto> GetUserByEmailAsync(GetUserRequestDto getUserRequest)
         {
-            try
-            {
-                var user = await _userManager.FindByEmailAsync(getUserRequest.Email);
-                var roles = await _userManager.GetRolesAsync(user);
-                if (user != null)
-                {
-                    return new GetUserResponseDto
-                    {
-                        Message = "Usuário encontrado com sucesso.",
-                        Email = user.Email,
-                        UserId = user.Id,
-                        UserName = user.Name,
-                        Roles = roles.ToList()
-                    };
-                }
-                
-                return new GetUserResponseDto
-                {
-                    Message = "Usuário não encontrado.",
-                };
+            var user = await _userManager.FindByEmailAsync(getUserRequest.Email);
+            var roles = await _userManager.GetRolesAsync(user);
 
-            }
-            catch (Exception ex)
+            if (user == null)
             {
-                return new GetUserResponseDto
-                {
-                    Message = $"Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde. {ex.Message}"
-                };
+                throw new NotFoundException("Usuário não encontrado.");
             }
+
+            return new GetUserResponseDto
+            {
+                Email = user.Email,
+                UserId = user.Id,
+                UserName = user.Name,
+                Roles = roles.ToList()
+            };
         }
 
     }

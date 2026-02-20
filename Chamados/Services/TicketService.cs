@@ -1,5 +1,6 @@
 ﻿using Chamados.Data;
 using Chamados.DTOs.Tickets;
+using Chamados.Exceptions;
 using Chamados.Interfaces;
 using Chamados.Models;
 using Microsoft.AspNetCore.Identity;
@@ -21,97 +22,66 @@ namespace Chamados.Services
             _userManager = userManager;
         }
 
-        public async Task<TicketResponse> OpenTicket(TicketRequestDto ticketRequest, string id)
+        public async Task<TicketResponse> OpenTicket(TicketRequestDto ticketRequest, string userId)
         {
-            try
-            {
-                var user = await _userManager.FindByIdAsync(id);
-                var userName = user != null ? user.Name : "Desconhecido";
+            var user = await _userManager.FindByIdAsync(userId);
+            var userName = user != null ? user.Name : "Desconhecido";
 
-                var ticket = new Ticket
-                {
-                    Title = ticketRequest.Title,
-                    Description = ticketRequest.Description,
-                    Priority = ticketRequest.Priority,
-                    AuthorId = id,
-                    Status = ticketRequest.Status,
-                    Created = ticketRequest.Created
-                };
-                _context.Tickets.Add(ticket);
-                var result = await _context.SaveChangesAsync();
-
-                if (result > 0)
-                {
-                    return new TicketResponse
-                    {
-                        Id = ticket.Id,
-                        Title = ticket.Title,
-                        Description = ticket.Description,
-                        AuthorName = userName,
-                        Date = ticket.Created
-                    };
-                }
-                else
-                {
-                    return new TicketResponse
-                    {
-                        Title = ticket.Title,
-                        Description = ticket.Description,
-                        AuthorName = userName,
-                        Date = DateTime.Now
-                    };
-                }
-            }
-            catch (Exception ex)
+            var ticket = new Ticket
             {
-                return null;
-            }
+                Title = ticketRequest.Title,
+                Description = ticketRequest.Description,
+                Priority = ticketRequest.Priority,
+                AuthorId = userId,
+                Status = ticketRequest.Status,
+                Created = ticketRequest.Created
+            };
+            _context.Tickets.Add(ticket);
+            await _context.SaveChangesAsync();
+
+            return new TicketResponse
+            {
+                Id = ticket.Id,
+                Title = ticket.Title,
+                Description = ticket.Description,
+                AuthorName = userName,
+                Date = ticket.Created
+            };
+
         }
 
         public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize)
         {
-            try
-            {
-                var tickets = await _context.Tickets
+            var tickets = await _context.Tickets
                     .OrderBy(c => c.Created)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
-                
-                return tickets.Select(ticket => new TicketListDto
-                {
-                    Id = ticket.Id,
-                    Title = ticket.Title,
-                    AuthorId = ticket.AuthorId,
-                    AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
-                    Created = ticket.Created,
-                    Status = ticket.Status,
-                    AssignedToUserId = ticket.AssignedToUserId,
-                    AssignedToUserName = !string.IsNullOrEmpty(ticket.AssignedToUserId) ? _userManager.FindByIdAsync(ticket.AssignedToUserId).Result.Name : null
-                }).ToList();
 
-            }
-            catch (Exception ex)
+            return tickets.Select(ticket => new TicketListDto
             {
-                _logger.LogError(ex, "Erro ao obter tickets");
-                return new List<TicketListDto>();
-            }
+                Id = ticket.Id,
+                Title = ticket.Title,
+                AuthorId = ticket.AuthorId,
+                AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
+                Created = ticket.Created,
+                Status = ticket.Status,
+                AssignedToUserId = ticket.AssignedToUserId,
+                AssignedToUserName = !string.IsNullOrEmpty(ticket.AssignedToUserId) ? _userManager.FindByIdAsync(ticket.AssignedToUserId).Result.Name : null
+            }).ToList();
         }
 
         public async Task<Ticket> GetTicketById(Guid id)
         {
-            try
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (ticket == null)
             {
-                return await _context.Tickets.FirstOrDefaultAsync(u => u.Id == id);
+                throw new NotFoundException("Ticket não encontrado");
             }
-            catch (Exception ex)
-            {
-                return new Ticket
-                {
-                    Title = $"Ocorreu um erro ao obter o ticket. Exceção: {ex.Message}"
-                };
-            }
+
+            return ticket;
         }
     }
 }

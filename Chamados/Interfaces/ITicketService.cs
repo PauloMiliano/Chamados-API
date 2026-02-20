@@ -5,7 +5,7 @@ namespace Chamados.Interfaces
 {
     public interface ITicketService
     {
-        Task<TicketResponse> OpenTicket(TicketRequestDto ticket, string id);
+        Task<TicketResponse> OpenTicket(TicketRequestDto ticket, string userId);
 
         Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize);
 

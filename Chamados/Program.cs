@@ -1,5 +1,6 @@
 using Chamados.Data;
 using Chamados.Interfaces;
+using Chamados.Middlewares;
 using Chamados.Models;
 using Chamados.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -119,6 +120,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 
