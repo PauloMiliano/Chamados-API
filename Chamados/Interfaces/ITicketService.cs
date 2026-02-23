@@ -7,10 +7,10 @@ namespace Chamados.Interfaces
     {
         Task<TicketResponse> OpenTicket(CreateTicketDto ticket, string userId);
 
-        Task<TicketResponse> AssignUserTicket(AssignTicketDto assignTicket, string userId);
+        Task<TicketResponse> AssignUserTicket(Guid ticketId, string userId);
 
         Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize);
 
-        Task<Ticket> GetTicketById(Guid id);
+        Task<TicketResponse> GetTicketById(Guid id);
     }
 }

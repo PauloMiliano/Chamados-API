@@ -1,10 +1,12 @@
 ﻿using Chamados.Data;
 using Chamados.DTOs.Tickets;
+using Chamados.Enums;
 using Chamados.Exceptions;
 using Chamados.Interfaces;
 using Chamados.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
 
 
 namespace Chamados.Services
@@ -51,9 +53,38 @@ namespace Chamados.Services
             };
         }
 
-        public async Task<TicketResponse> AssignUserTicket (AssignTicketDto assignTicket, string userId)
+        public async Task<TicketResponse> CloseTicket(Guid ticketId)
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == assignTicket.TicketId);
+            var ticket = await _context.Tickets
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(u => u.Id == ticketId);
+
+            if (ticket == null)
+            {
+                throw new NotFoundException("Ticket não encontrado");
+            }
+
+            ticket.Status = TicketStatus.Closed;
+            await _context.SaveChangesAsync();
+
+            return new TicketResponse
+            {
+                Id = ticket.Id,
+                AuthorName = ticket.Author.Name,
+                Title = ticket.Title,
+                Priority = ticket.Priority,
+                Status = ticket.Status,
+                Description = ticket.Description,
+                Date = ticket.Created
+            };
+        }
+
+        public async Task<TicketResponse> AssignUserTicket (Guid ticketId, string userId)
+        {
+            var ticket = await _context.Tickets
+                .Include(a => a.Author)
+                .Include(a => a.AssignedToUser)
+                .FirstOrDefaultAsync(u => u.Id == ticketId);
 
             if (ticket == null)
             {
@@ -63,54 +94,70 @@ namespace Chamados.Services
             ticket.AssignedToUserId = userId;
             await _context.SaveChangesAsync();
 
-            var userNameAnalyst = _userManager.FindByIdAsync(userId).Result.Name;
-
             return new TicketResponse
             {
                 Id = ticket.Id,
-                AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
+                AuthorName = ticket.Author.Name,
                 Title = ticket.Title,
                 Priority = ticket.Priority,
                 Status = ticket.Status,
-                Description = ticket.Description,
                 Date = ticket.Created,
-                AssignedToUserName = userNameAnalyst
+                AssignedToUserName = ticket.AssignedToUser.Name,
             };
-
         }
 
         public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize)
         {
             var tickets = await _context.Tickets
+                    .Include(a => a.Author)
+                    .Include(a => a.AssignedToUser)
                     .OrderBy(c => c.Created)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
+            var ticketList = new List<TicketListDto>();
 
-            return tickets.Select(ticket => new TicketListDto
+            foreach (var ticket in tickets)
             {
-                Id = ticket.Id,
-                Title = ticket.Title,
-                AuthorId = ticket.AuthorId,
-                AuthorName = _userManager.FindByIdAsync(ticket.AuthorId).Result.Name,
-                Created = ticket.Created,
-                Status = ticket.Status,
-                AssignedToUserId = ticket.AssignedToUserId,
-                AssignedToUserName = !string.IsNullOrEmpty(ticket.AssignedToUserId) ? _userManager.FindByIdAsync(ticket.AssignedToUserId).Result.Name : null
-            }).ToList();
+                ticketList.Add(new TicketListDto
+                {
+                    TicketId = ticket.Id,
+                    Title = ticket.Title,
+                    AuthorId = ticket.AuthorId,
+                    AuthorName = ticket.Author.Name,
+                    Created = ticket.Created,
+                    Status = ticket.Status,
+                    AssignedToUserId = ticket.AssignedToUserId,
+                    AssignedToUserName = ticket.AssignedToUser.Name,
+                });
+            }
+            return ticketList;
         }
 
-        public async Task<Ticket> GetTicketById(Guid id)
+        public async Task<TicketResponse> GetTicketById(Guid id)
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(u => u.Id == id);
+            var ticket = await _context.Tickets
+                .Include(a => a.Author)
+                .Include(a => a.AssignedToUser)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (ticket == null)
             {
                 throw new NotFoundException("Ticket não encontrado");
             }
 
-            return ticket;
+            return new TicketResponse
+            {
+                Id = ticket.Id,
+                AuthorName = ticket.Author.Name,
+                Title = ticket.Title,
+                Priority = ticket.Priority,
+                Status = ticket.Status,
+                Description = ticket.Description,
+                Date = ticket.Created,
+                AssignedToUserName = ticket.AssignedToUser.Name
+            };
         }
     }
 }

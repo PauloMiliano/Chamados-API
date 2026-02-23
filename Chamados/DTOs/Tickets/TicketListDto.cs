@@ -5,8 +5,7 @@ namespace Chamados.DTOs.Tickets
 {
     public class TicketListDto
     {
-        [Key]
-        public Guid Id { get; set; }
+        public Guid TicketId { get; set; }
         [Required(ErrorMessage = "O campo de título é obrigatório.")]
         public string Title { get; set; }
         [Required(ErrorMessage = "O Id do usuário é obrigatório.")]

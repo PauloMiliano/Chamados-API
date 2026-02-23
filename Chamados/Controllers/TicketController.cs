@@ -43,12 +43,17 @@ namespace Chamados.Controllers
         }
 
         [Authorize(Roles = "Admin, Analyst")]
-        [HttpPut("assign/{userId}")]
-        public async Task<IActionResult> AssignUserTicket([FromRoute] AssignTicketDto assignTicket)
+        [HttpPut("assign/{ticketId}")]
+        public async Task<IActionResult> AssignUserTicket([FromRoute] Guid ticketId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var ticketResponse = await _ticketService.AssignUserTicket(assignTicket, userId);
+            var ticketResponse = await _ticketService.AssignUserTicket(ticketId, userId);
             return Ok(ticketResponse);
         }
+
+        //[Authorize(Roles = "Admin, Analyst")]
+        //[HttpPut("close/{ticketId}")]
+        //public async Task<IActionResult> CloseTicket([FromRoute] )
+
     }
 }
