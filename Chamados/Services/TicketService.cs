@@ -6,7 +6,6 @@ using Chamados.Interfaces;
 using Chamados.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Sockets;
 
 
 namespace Chamados.Services
@@ -131,15 +130,31 @@ namespace Chamados.Services
             };
         }
 
-        public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize)
+        public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, TicketStatus? status)
         {
-            var tickets = await _context.Tickets
-                    .Include(a => a.Author)
-                    .Include(a => a.AssignedToUser)
-                    .OrderBy(c => c.Created)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
+            var tickets = new List<Ticket>();
+
+            if (status.HasValue)
+            {
+                tickets = await _context.Tickets
+                        .Include(a => a.Author)
+                        .Include(a => a.AssignedToUser)
+                        .OrderBy(c => c.Created)
+                        .Where(t => t.Status == status)
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+            }
+            else
+            {
+                tickets = await _context.Tickets
+                        .Include(a => a.Author)
+                        .Include(a => a.AssignedToUser)
+                        .OrderBy(c => c.Created)
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+            }
 
             var ticketList = new List<TicketListDto>();
 

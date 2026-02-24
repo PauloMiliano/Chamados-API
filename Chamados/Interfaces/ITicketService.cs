@@ -1,4 +1,5 @@
 ﻿using Chamados.DTOs.Tickets;
+using Chamados.Enums;
 using Chamados.Models;
 
 namespace Chamados.Interfaces
@@ -11,7 +12,7 @@ namespace Chamados.Interfaces
 
         Task<AssignTicketDto> AssignUserTicket(Guid ticketId, string userId);
 
-        Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize);
+        Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, TicketStatus? status);
 
         Task<TicketResponse> GetTicketById(Guid id);
     }

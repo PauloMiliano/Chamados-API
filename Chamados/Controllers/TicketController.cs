@@ -1,4 +1,5 @@
 ﻿using Chamados.DTOs.Tickets;
+using Chamados.Enums;
 using Chamados.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace Chamados.Controllers
             _ticketService = ticketService;
         }
 
+        [Authorize(Roles = "User, Analyst, Admin")]
         [HttpPost("open")]
         public async Task<IActionResult> OpenTicket([FromBody] CreateTicketDto ticket)
         {
@@ -28,9 +30,9 @@ namespace Chamados.Controllers
 
         [Authorize(Roles = "Admin,Analyst")]
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllTickets([FromQuery] int pageNumber, int pageSize)
+        public async Task<IActionResult> GetAllTickets([FromQuery] int pageNumber, int pageSize, TicketStatus? status)
         {
-            var tickets = await _ticketService.GetAllTickets(pageNumber, pageSize);
+            var tickets = await _ticketService.GetAllTickets(pageNumber, pageSize, status);
             return Ok(tickets);
         }
 
