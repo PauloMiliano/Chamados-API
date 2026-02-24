@@ -12,6 +12,7 @@ namespace Chamados.Data
         }
 
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<TicketHistory> TicketHistories { get; set; }
 
-    }
+        }
 }

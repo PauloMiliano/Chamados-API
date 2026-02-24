@@ -51,9 +51,13 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
-        //[Authorize(Roles = "Admin, Analyst")]
-        //[HttpPut("close/{ticketId}")]
-        //public async Task<IActionResult> CloseTicket([FromRoute] )
+        [Authorize(Roles = "Admin, Analyst")]
+        [HttpPut("close/{ticketId}")]
+        public async Task<IActionResult> CloseTicket([FromRoute] Guid ticketId)
+        {
+            var ticketResponse = await _ticketService.CloseTicket(ticketId);
+            return Ok(ticketResponse);
+        }
 
     }
 }

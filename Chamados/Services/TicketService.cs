@@ -36,9 +36,18 @@ namespace Chamados.Services
                 Priority = ticketRequest.Priority,
                 AuthorId = userId,
                 Status = ticketRequest.Status,
-                Created = ticketRequest.Created
+                Created = DateTime.UtcNow
             };
-            _context.Tickets.Add(ticket);
+            await _context.Tickets.AddAsync(ticket);
+
+            var ticketHistory = new TicketHistory
+            {
+                TicketId = ticket.Id,
+                Action = TicketActions.Opened,
+                PerformedByUserId = userId,
+                PerformedAt = DateTime.UtcNow
+            };
+            await _context.TicketHistories.AddAsync(ticketHistory);
             await _context.SaveChangesAsync();
 
             return new TicketResponse
@@ -53,7 +62,7 @@ namespace Chamados.Services
             };
         }
 
-        public async Task<TicketResponse> CloseTicket(Guid ticketId)
+        public async Task<CloseTicketDto> CloseTicket(Guid ticketId)
         {
             var ticket = await _context.Tickets
                 .Include(a => a.Author)
@@ -64,22 +73,29 @@ namespace Chamados.Services
                 throw new NotFoundException("Ticket não encontrado");
             }
 
+            var ticketHistory = new TicketHistory
+            {
+                TicketId = ticket.Id,
+                Action = TicketActions.Closed,
+                PerformedByUserId = ticket.Author.Id,
+                PerformedAt = DateTime.UtcNow
+            };
+
+            await _context.TicketHistories.AddAsync(ticketHistory);
             ticket.Status = TicketStatus.Closed;
             await _context.SaveChangesAsync();
 
-            return new TicketResponse
+            return new CloseTicketDto
             {
                 Id = ticket.Id,
                 AuthorName = ticket.Author.Name,
                 Title = ticket.Title,
-                Priority = ticket.Priority,
                 Status = ticket.Status,
-                Description = ticket.Description,
-                Date = ticket.Created
+                Date = DateTime.UtcNow
             };
         }
 
-        public async Task<TicketResponse> AssignUserTicket (Guid ticketId, string userId)
+        public async Task<AssignTicketDto> AssignUserTicket (Guid ticketId, string userId)
         {
             var ticket = await _context.Tickets
                 .Include(a => a.Author)
@@ -91,18 +107,27 @@ namespace Chamados.Services
                 throw new NotFoundException("Ticket não encontrado");
             }
 
+            var ticketHistory = new TicketHistory
+            {
+                TicketId = ticket.Id,
+                Action = TicketActions.Assigned,
+                PerformedByUserId = ticket.Author.Id,
+                PerformedAt = DateTime.UtcNow
+            };
+
+            await _context.TicketHistories.AddAsync(ticketHistory);
             ticket.AssignedToUserId = userId;
+            ticket.Status = TicketStatus.InProgress;
             await _context.SaveChangesAsync();
 
-            return new TicketResponse
+            return new AssignTicketDto
             {
                 Id = ticket.Id,
-                AuthorName = ticket.Author.Name,
                 Title = ticket.Title,
-                Priority = ticket.Priority,
+                AuthorName = ticket.Author.Name,
+                AssignedToUserName = ticket.AssignedToUser.Name,
                 Status = ticket.Status,
                 Date = ticket.Created,
-                AssignedToUserName = ticket.AssignedToUser.Name,
             };
         }
 
@@ -120,6 +145,8 @@ namespace Chamados.Services
 
             foreach (var ticket in tickets)
             {
+                var assignedToUserName = ticket.AssignedToUser != null ? ticket.AssignedToUser.Name : null;
+
                 ticketList.Add(new TicketListDto
                 {
                     TicketId = ticket.Id,
@@ -129,7 +156,7 @@ namespace Chamados.Services
                     Created = ticket.Created,
                     Status = ticket.Status,
                     AssignedToUserId = ticket.AssignedToUserId,
-                    AssignedToUserName = ticket.AssignedToUser.Name,
+                    AssignedToUserName = assignedToUserName,
                 });
             }
             return ticketList;
