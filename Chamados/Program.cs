@@ -87,10 +87,11 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
-
+builder.Services.AddScoped<ITicketMessageService, TicketMessageService>();
 
 var app = builder.Build();
 

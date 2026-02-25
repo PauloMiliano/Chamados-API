@@ -7,5 +7,6 @@
         Reopened,
         Assigned,
         PriorityChanged,
+        Answered
     }
 }

@@ -6,6 +6,7 @@ using Chamados.Interfaces;
 using Chamados.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace Chamados.Services
@@ -130,59 +131,46 @@ namespace Chamados.Services
             };
         }
 
-        public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, TicketStatus? status)
+        public async Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, string userId, string userRole, TicketStatus? status)
         {
-            var tickets = new List<Ticket>();
+            var tickets = _context.Tickets
+                        .Include(a => a.Author)
+                        .Include(a => a.AssignedToUser)
+                        .OrderByDescending(c => c.Created)
+                        .AsQueryable();
+
+            if (userRole == "User")
+            {
+                tickets = tickets.Where(t => t.AuthorId == userId);
+            }
 
             if (status.HasValue)
             {
-                tickets = await _context.Tickets
-                        .Include(a => a.Author)
-                        .Include(a => a.AssignedToUser)
-                        .OrderBy(c => c.Created)
-                        .Where(t => t.Status == status)
-                        .Skip((pageNumber - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToListAsync();
-            }
-            else
-            {
-                tickets = await _context.Tickets
-                        .Include(a => a.Author)
-                        .Include(a => a.AssignedToUser)
-                        .OrderBy(c => c.Created)
-                        .Skip((pageNumber - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToListAsync();
+                tickets = tickets.Where(t => t.Status == status.Value);
             }
 
-            var ticketList = new List<TicketListDto>();
-
-            foreach (var ticket in tickets)
-            {
-                var assignedToUserName = ticket.AssignedToUser != null ? ticket.AssignedToUser.Name : null;
-
-                ticketList.Add(new TicketListDto
+            var ticketList = await tickets
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new TicketListDto
                 {
-                    TicketId = ticket.Id,
-                    Title = ticket.Title,
-                    AuthorId = ticket.AuthorId,
-                    AuthorName = ticket.Author.Name,
-                    Created = ticket.Created,
-                    Status = ticket.Status,
-                    AssignedToUserId = ticket.AssignedToUserId,
-                    AssignedToUserName = assignedToUserName,
-                });
-            }
+                    TicketId = t.Id,
+                    Title = t.Title,
+                    AuthorName = t.Author.Name,
+                    Created = t.Created,
+                    Status = t.Status,
+                    AssignedToUserName = t.AssignedToUser != null ? t.AssignedToUser.Name : null
+                })
+                .ToListAsync();
             return ticketList;
         }
 
-        public async Task<TicketResponse> GetTicketById(Guid id)
+        public async Task<TicketResponse> GetTicketById(Guid ticketId)
         {
             var ticket = await _context.Tickets
                 .Include(a => a.Author)
                 .Include(a => a.AssignedToUser)
-                .FirstOrDefaultAsync(u => u.Id == id);
+                .FirstOrDefaultAsync(t => t.Id == ticketId);
 
             if (ticket == null)
             {

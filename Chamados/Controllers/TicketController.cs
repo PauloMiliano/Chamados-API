@@ -28,19 +28,21 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
-        [Authorize(Roles = "Admin,Analyst")]
+        [Authorize(Roles = "Admin,Analyst,User")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAllTickets([FromQuery] int pageNumber, int pageSize, TicketStatus? status)
         {
-            var tickets = await _ticketService.GetAllTickets(pageNumber, pageSize, status);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+            var tickets = await _ticketService.GetAllTickets(pageNumber, pageSize, userId, userRole, status);
             return Ok(tickets);
         }
 
         [Authorize(Roles = "Admin, Analyst")]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTicketById([FromRoute] Guid id)
+        public async Task<IActionResult> GetTicketById([FromRoute] Guid ticketId)
         {
-            var ticket = await _ticketService.GetTicketById(id);
+            var ticket = await _ticketService.GetTicketById(ticketId);
             return Ok(ticket);
         }
 

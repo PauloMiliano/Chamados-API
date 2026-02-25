@@ -12,8 +12,8 @@ namespace Chamados.Interfaces
 
         Task<AssignTicketDto> AssignUserTicket(Guid ticketId, string userId);
 
-        Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, TicketStatus? status);
+        Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, string userId, string userRole, TicketStatus? status);
 
-        Task<TicketResponse> GetTicketById(Guid id);
+        Task<TicketResponse> GetTicketById(Guid ticketId);
     }
 }
