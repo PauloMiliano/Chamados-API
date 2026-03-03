@@ -2,6 +2,9 @@
 
 namespace Chamados.DTOs.Tickets
 {
+    /// <summary>
+    /// Represents the data returned when a ticket is closed.
+    /// </summary>
     public class CloseTicketDto
     {
         public Guid Id { get; set; }

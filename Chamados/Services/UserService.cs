@@ -25,6 +25,18 @@ namespace Chamados.Services
             _signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Logins a user and returns a JWT token if the credentials are valid.
+        /// </summary>
+        /// <param name="requestUser">
+        /// Contains the required information to login in a user.
+        /// </param>
+        /// <returns>
+        /// The JWT token if the login is successful.
+        /// </returns>
+        /// <exception cref="UnauthorizedAccessException">
+        /// Thrown when the user is not found, the password is invalid, or the user is locked out due to multiple failed login attempts.
+        /// </exception>
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto requestUser)
         {
             var user = await _userManager.FindByEmailAsync(requestUser.Email);
@@ -58,6 +70,21 @@ namespace Chamados.Services
             };
         }
 
+        /// <summary>
+        /// Registers a new user with the specified information.
+        /// </summary>
+        /// <param name="registerRequest">
+        /// Contains the required information to register a new user.
+        /// </param>
+        /// <returns>
+        /// The registered user's name and a JWT token if the registration is successful.
+        /// </returns>
+        /// <exception cref="BadRequestException">
+        /// Thrown when the user creation fails due to validation errors (e.g., password not meeting requirements, email already in use) or when adding the user to the specified role fails.
+        /// </exception>
+        /// <exception cref="ApplicationException">
+        /// Thrown when there is an unexpected error during the registration process, such as a failure to add the user to the specified role after successful creation.
+        /// </exception>
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto registerRequest)
         {
             var user = new User
@@ -92,25 +119,5 @@ namespace Chamados.Services
                 Token = token
             };
         }
-
-        public async Task<GetUserResponseDto> GetUserByEmailAsync(GetUserRequestDto getUserRequest)
-        {
-            var user = await _userManager.FindByEmailAsync(getUserRequest.Email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (user == null)
-            {
-                throw new NotFoundException("Usuário não encontrado.");
-            }
-
-            return new GetUserResponseDto
-            {
-                Email = user.Email,
-                UserId = user.Id,
-                UserName = user.Name,
-                Roles = roles.ToList()
-            };
-        }
-
     }
 }

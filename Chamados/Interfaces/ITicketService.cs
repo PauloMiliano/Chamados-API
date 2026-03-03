@@ -4,6 +4,9 @@ using Chamados.Models;
 
 namespace Chamados.Interfaces
 {
+    /// <summary>
+    /// Provides operations for managing tickets.
+    /// </summary>
     public interface ITicketService
     {
         Task<TicketResponse> OpenTicket(CreateTicketDto ticket, string userId);

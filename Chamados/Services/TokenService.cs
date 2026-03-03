@@ -20,6 +20,16 @@ namespace Chamados.Services
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Generates a JWT token for the given user, including their roles as claims.
+        /// </summary>
+        /// <param name="user">
+        /// User object for which the token is being generated.
+        /// </param>
+        /// <returns>
+        /// The generated JWT token as a string, which includes claims for the user's ID, email, name, and roles. 
+        /// The token is signed using HMAC SHA256 and is valid for 2 hours.
+        /// </returns>
         public async Task<string> GenerateToken(User user)
         {
             var claims = new List<Claim>

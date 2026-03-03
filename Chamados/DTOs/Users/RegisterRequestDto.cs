@@ -2,6 +2,9 @@
 
 namespace Chamados.DTOs.Users
 {
+    /// <summary>
+    /// Represents a request to register a new user, containing the user's name, email, password, and role.
+    /// </summary>
     public class RegisterRequestDto
     {
         [Required(ErrorMessage = "O nome do usuário é obrigatório.")]

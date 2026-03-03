@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Chamados.DTOs.Tickets
 {
+    /// <summary>
+    /// Represents the data required to create a new ticket in the system.
+    /// </summary>
     public class CreateTicketDto
     {
         [Required(ErrorMessage = "O título do Ticket é obrigatório.")]

@@ -43,14 +43,5 @@ namespace Chamados.Controllers
             return Ok(registerResponse);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPost("get")]
-        public async Task<IActionResult> GetUserByEmail([FromBody] GetUserRequestDto getUserRequest)
-        {
-            _logger.LogInformation("Tentativa de obter usuário para o email: {Email}", getUserRequest);
-            var userResponse = await _userService.GetUserByEmailAsync(getUserRequest);
-            return Ok(userResponse);
-
-        }
     }
 }

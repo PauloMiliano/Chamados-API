@@ -2,6 +2,9 @@
 
 namespace Chamados.DTOs.Tickets
 {
+    /// <summary>
+    /// Represents the data returned when performing actions on a ticket, such as assigning a user or reopening a ticket.
+    /// </summary>
     public class TicketActionsDto
     {
         public Guid Id { get; set; }

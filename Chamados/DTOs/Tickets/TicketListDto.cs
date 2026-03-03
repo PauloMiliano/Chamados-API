@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Chamados.DTOs.Tickets
 {
+    /// <summary>
+    /// Represents the data returned when listing tickets in the system.
+    /// </summary>
     public class TicketListDto
     {
         public Guid TicketId { get; set; }

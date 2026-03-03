@@ -5,6 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Chamados.DTOs.Tickets
 {
+    /// <summary>
+    /// Represents the details of a ticket as returned by the ticketing system.
+    /// </summary>
     public class TicketResponse
     {
         public Guid Id { get; set; }

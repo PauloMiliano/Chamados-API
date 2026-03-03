@@ -19,6 +19,12 @@ namespace Chamados.Controllers
             _ticketService = ticketService;
         }
 
+        /// <summary>
+        /// Opens a new ticket with the provided details.
+        /// </summary>
+        /// <param name="ticket">
+        /// Data required to create a new ticket.
+        /// </param>
         [Authorize(Roles = "User,Analyst,Admin")]
         [HttpPost("open")]
         public async Task<IActionResult> OpenTicket([FromBody] CreateTicketDto ticket)
@@ -28,6 +34,19 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
+        /// <summary>
+        /// Gets a paginated list of tickets, optionally filtered by status. 
+        /// Admins and Analysts can see all tickets, while Users can only see their own tickets.
+        /// </summary>
+        /// <param name="pageNumber">
+        /// Page number for pagination (starting from 1).
+        /// </param>
+        /// <param name="pageSize">
+        /// Page size for pagination (number of tickets per page).
+        /// </param>
+        /// <param name="status">
+        /// Ticket status to filter by (optional). If not provided, all tickets are returned.
+        /// </param>
         [Authorize(Roles = "Admin,Analyst,User")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAllTickets([FromQuery] int pageNumber, int pageSize, TicketStatus? status)
@@ -38,6 +57,12 @@ namespace Chamados.Controllers
             return Ok(tickets);
         }
 
+        /// <summary>
+        /// Gets the details of a specific ticket by its ID.
+        /// </summary>
+        /// <param name="ticketId">
+        /// Identifier of the ticket to retrieve.
+        /// </param>
         [Authorize(Roles = "Admin,Analyst")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTicketById([FromRoute] Guid ticketId)
@@ -46,6 +71,12 @@ namespace Chamados.Controllers
             return Ok(ticket);
         }
 
+        /// <summary>
+        /// Assigns the current user to the specified ticket.
+        /// </summary>
+        /// <param name="ticketId">
+        /// Identifier of the ticket to which the user will be assigned.
+        /// </param>
         [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("assign/{ticketId}")]
         public async Task<IActionResult> AssignUserTicket([FromRoute] Guid ticketId)
@@ -55,6 +86,12 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
+        /// <summary>
+        /// Closes the specified ticket, changing its status to "Closed".
+        /// </summary>
+        /// <param name="ticketId">
+        /// Identifier of the ticket to be closed.
+        /// </param>
         [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("close/{ticketId}")]
         public async Task<IActionResult> CloseTicket([FromRoute] Guid ticketId)
@@ -63,6 +100,12 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
+        /// <summary>
+        /// Reopens the specified ticket, changing its status back to "Open".
+        /// </summary>
+        /// <param name="ticketId">
+        /// Identifier of the ticket to be reopened.
+        /// </param>
         [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("reopen/{ticketId}")]
         public async Task<IActionResult> ReopenTicket([FromRoute] Guid ticketId)
@@ -71,6 +114,15 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
+        /// <summary>
+        /// Changes the priority of the specified ticket to the provided value.
+        /// </summary>
+        /// <param name="ticketId">
+        /// Identifier of the ticket whose priority will be changed.
+        /// </param>
+        /// <param name="priority">
+        /// Priority level to set for the ticket (Low, Medium, High, Critical).
+        /// </param>
         [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("priority/{ticketId}")]
         public async Task<IActionResult> ChangeTicketPriority([FromRoute] Guid ticketId, [FromBody] TicketPriority priority)

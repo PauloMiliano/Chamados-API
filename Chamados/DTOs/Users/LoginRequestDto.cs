@@ -2,6 +2,9 @@
 
 namespace Chamados.DTOs.Users
 {
+    /// <summary>
+    /// Represents a request to login a user, containing the user's email and password.
+    /// </summary>
     public class LoginRequestDto
     {
         [Required(ErrorMessage = "O e-mail do usuário é obrigatório.")]
