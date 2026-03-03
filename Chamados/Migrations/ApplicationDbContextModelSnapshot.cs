@@ -351,7 +351,7 @@ namespace Chamados.Migrations
                     b.HasOne("Chamados.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Chamados.Models.Ticket", "Ticket")

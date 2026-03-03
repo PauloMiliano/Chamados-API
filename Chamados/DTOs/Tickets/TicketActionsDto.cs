@@ -2,7 +2,7 @@
 
 namespace Chamados.DTOs.Tickets
 {
-    public class AssignTicketDto
+    public class TicketActionsDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

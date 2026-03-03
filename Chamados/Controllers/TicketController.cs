@@ -19,7 +19,7 @@ namespace Chamados.Controllers
             _ticketService = ticketService;
         }
 
-        [Authorize(Roles = "User, Analyst, Admin")]
+        [Authorize(Roles = "User,Analyst,Admin")]
         [HttpPost("open")]
         public async Task<IActionResult> OpenTicket([FromBody] CreateTicketDto ticket)
         {
@@ -38,7 +38,7 @@ namespace Chamados.Controllers
             return Ok(tickets);
         }
 
-        [Authorize(Roles = "Admin, Analyst")]
+        [Authorize(Roles = "Admin,Analyst")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTicketById([FromRoute] Guid ticketId)
         {
@@ -46,7 +46,7 @@ namespace Chamados.Controllers
             return Ok(ticket);
         }
 
-        [Authorize(Roles = "Admin, Analyst")]
+        [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("assign/{ticketId}")]
         public async Task<IActionResult> AssignUserTicket([FromRoute] Guid ticketId)
         {
@@ -55,7 +55,7 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
-        [Authorize(Roles = "Admin, Analyst")]
+        [Authorize(Roles = "Admin,Analyst")]
         [HttpPut("close/{ticketId}")]
         public async Task<IActionResult> CloseTicket([FromRoute] Guid ticketId)
         {
@@ -63,5 +63,20 @@ namespace Chamados.Controllers
             return Ok(ticketResponse);
         }
 
+        [Authorize(Roles = "Admin,Analyst")]
+        [HttpPut("reopen/{ticketId}")]
+        public async Task<IActionResult> ReopenTicket([FromRoute] Guid ticketId)
+        {
+            var ticketResponse = await _ticketService.ReopenTicket(ticketId);
+            return Ok(ticketResponse);
+        }
+
+        [Authorize(Roles = "Admin,Analyst")]
+        [HttpPut("priority/{ticketId}")]
+        public async Task<IActionResult> ChangeTicketPriority([FromRoute] Guid ticketId, [FromBody] TicketPriority priority)
+        {
+            var ticketResponse = await _ticketService.ChangeTicketPriority(ticketId, priority);
+            return Ok(ticketResponse);
+        }
     }
 }

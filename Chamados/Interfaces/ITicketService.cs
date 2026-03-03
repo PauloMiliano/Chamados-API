@@ -10,10 +10,15 @@ namespace Chamados.Interfaces
 
         Task<CloseTicketDto> CloseTicket(Guid ticketId);
 
-        Task<AssignTicketDto> AssignUserTicket(Guid ticketId, string userId);
+        Task<TicketActionsDto> AssignUserTicket(Guid ticketId, string userId);
 
         Task<List<TicketListDto>> GetAllTickets(int pageNumber, int pageSize, string userId, string userRole, TicketStatus? status);
 
         Task<TicketResponse> GetTicketById(Guid ticketId);
+
+        Task<TicketActionsDto> ReopenTicket(Guid ticketId);
+
+        Task<TicketActionsDto> ChangeTicketPriority(Guid ticketId, TicketPriority priority);
+
     }
 }

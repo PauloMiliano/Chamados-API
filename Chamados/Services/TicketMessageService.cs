@@ -4,6 +4,7 @@ using Chamados.Enums;
 using Chamados.Exceptions;
 using Chamados.Interfaces;
 using Chamados.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Sockets;
 
@@ -13,10 +14,12 @@ namespace Chamados.Services
     {
 
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public TicketMessageService(ApplicationDbContext context)
+        public TicketMessageService(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<TicketMessageResponseDto> CreateMessageAsync(Guid ticketId, string senderId, CreateTicketMessageDto messageRequest)
@@ -37,7 +40,8 @@ namespace Chamados.Services
             {
                 SenderId = senderId,
                 TicketId = ticketId,
-                Message = messageRequest.Message
+                Message = messageRequest.Message,
+                SentAt = DateTime.UtcNow
             };
 
             await _context.TicketMessages.AddAsync(message);
@@ -50,12 +54,13 @@ namespace Chamados.Services
                 PerformedAt = DateTime.UtcNow
             };
             await _context.TicketHistories.AddAsync(ticketHistory);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            var sender = await _userManager.FindByIdAsync(senderId);
 
             return new TicketMessageResponseDto
             {
                 Id = message.Id,
-                SenderName = message.Sender.Name,
+                SenderName = sender.Name,
                 Message = message.Message,
                 SentAt = message.SentAt
             };

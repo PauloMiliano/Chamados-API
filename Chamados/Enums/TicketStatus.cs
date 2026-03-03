@@ -4,8 +4,6 @@
     {
         Open,
         InProgress,
-        WaitingUser,
-        Resolved,
         Closed
     }
 }

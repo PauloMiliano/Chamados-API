@@ -44,6 +44,9 @@ namespace Chamados.Middlewares
                 case UnauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
                     break;
+                case InvalidOperationException:
+                    statusCode = HttpStatusCode.BadRequest;
+                    break;
                 default:
                     statusCode = HttpStatusCode.InternalServerError;
                     message = "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.";

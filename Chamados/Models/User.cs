@@ -8,6 +8,5 @@ namespace Chamados.Models
     {
         [Required(ErrorMessage = "O nome do usuário é obrigatório.")]
         public string Name { get; set; }
-
     }
 }

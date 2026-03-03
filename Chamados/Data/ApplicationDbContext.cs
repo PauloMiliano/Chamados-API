@@ -15,5 +15,15 @@ namespace Chamados.Data
         public DbSet<TicketHistory> TicketHistories { get; set; }
         public DbSet<TicketMessage> TicketMessages { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<TicketMessage>()
+                .HasOne(tm => tm.Sender)
+                .WithMany()
+                .HasForeignKey(tm => tm.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+    }
 }

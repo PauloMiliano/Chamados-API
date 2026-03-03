@@ -21,17 +21,19 @@ namespace Chamados.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetMessagesByTicketId([FromRoute] Guid ticketId)
+        [Authorize(Roles = "User,Admin,Analyst")]
+        public async Task<IActionResult> GetMessagesByTicketId([FromRoute] Guid ticketId)
         {
-            var messageRequest = _messageService.GetMessagesAsync(ticketId);
+            var messageRequest = await _messageService.GetMessagesAsync(ticketId);
             return Ok(messageRequest);
         }
 
         [HttpPost]
-        public IActionResult AddMessageToTicket([FromRoute] Guid ticketId, [FromBody] CreateTicketMessageDto message)
+        [Authorize(Roles = "User,Admin,Analyst")]
+        public async Task<IActionResult> AddMessageToTicket([FromRoute] Guid ticketId, [FromBody] CreateTicketMessageDto message)
         {
             var senderId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var messageRequest = _messageService.CreateMessageAsync(ticketId, senderId, message);
+            var messageRequest = await _messageService.CreateMessageAsync(ticketId, senderId, message);
             return Ok(messageRequest);
         }
     }
